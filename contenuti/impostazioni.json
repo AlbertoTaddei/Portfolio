@@ -1,0 +1,13 @@
+{
+  "nome": "Nome Cognome",
+  "descrizioneSito": "Portfolio di Nome Cognome: film, render e videogiochi.",
+  "email": "nome@esempio.it",
+  "linkedin": "https://www.linkedin.com/in/...",
+  "curriculum": "https://drive.google.com/...",
+  "categorie": [
+    { "nome": "Film Making", "colore": "#ef4444" },
+    { "nome": "Renders",     "colore": "#facc15" },
+    { "nome": "Videogames",  "colore": "#38bdf8" },
+    { "nome": "Others",      "colore": "#4ade80" }
+  ]
+}
