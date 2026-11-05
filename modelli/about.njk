@@ -2,8 +2,6 @@
 layout: base.njk
 sezione: about
 permalink: about/
-eleventyComputed:
-  titoloPagina: "{{ testi.menuAbout }}"
 ---
 {#- Pagina About: foto (facoltativa), presentazione, software, contatti. -#}
 <div class="about{% if not about.foto %} about--senza-foto{% endif %}">

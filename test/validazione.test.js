@@ -60,3 +60,14 @@ test("ErroreContenuti unisce i messaggi", () => {
   assert.deepEqual(err.messaggi, ["a", "b"]);
   assert.equal(err.message, "a\nb");
 });
+
+test("Final #2: ErroreContenuti senza righe di codice nello stack", () => {
+  const err = new ErroreContenuti(["progetti/x/progetto.md: manca \"titolo\""]);
+  assert.doesNotMatch(err.stack, /\n\s+at /);
+  assert.match(err.stack, /manca "titolo"/);
+});
+
+test("Final #6: suggerimento quando cambia solo maiuscolo/minuscolo", () => {
+  const r = validaProgetto(base({ dati: { ...buono, copertina: "Copertina.jpg" }, esiste: () => false, suggerisci: (f) => f.toLowerCase() }));
+  assert.ok(r.errori.includes(`${P}immagine "Copertina.jpg" non trovata: forse intendevi "copertina.jpg"?`));
+});

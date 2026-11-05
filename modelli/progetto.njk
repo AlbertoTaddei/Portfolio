@@ -6,10 +6,6 @@ pagination:
   size: 1
   alias: p
 permalink: "progetti/{{ p.cartella }}/"
-eleventyComputed:
-  titoloPagina: "{{ p.titolo }}"
-  descrizione: "{{ p.intro }}"
-  immagineOg: "{{ p.copertina.jpeg }}"
 ---
 {#- Pagina di un progetto: intestazione, corpo (da progetto.md), vicini. -#}
 <a class="torna" href="{{ '/' | url }}">{{ testi.tornaAiProgetti }}</a>

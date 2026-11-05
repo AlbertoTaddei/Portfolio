@@ -2,7 +2,7 @@
 // Se trova errori li raccoglie tutti e ferma la costruzione con un messaggio chiaro.
 
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname, basename } from "node:path";
 import matter from "gray-matter";
 import MarkdownIt from "markdown-it";
 import { separaIntro, slugCategoria, normalizzaBooleano } from "./testo.js";
@@ -12,16 +12,23 @@ import { ordinaProgetti, collegaVicini } from "./ordine.js";
 import { preparaImmagine, MISURE } from "./immagini.js";
 
 // Immagine in un blocco da sola: ![didascalia](file.jpg) — il nome può contenere spazi.
-const IMMAGINE = /!\[([^\]]*)\]\(\s*<?([^)>]+?)>?\s*\)/g;
-const IMMAGINE_SOLA = /^!\[([^\]]*)\]\(\s*<?([^)>]+?)>?\s*\)$/;
+// Accetta anche parentesi nel nome, come "foto (1).jpg".
+const PERCORSO = String.raw`\(\s*<?((?:[^()<>\n]|\([^()\n]*\))+?)>?\s*\)`;
+const IMMAGINE = new RegExp(String.raw`!\[([^\]]*)\]` + PERCORSO, "g");
+const IMMAGINE_SOLA = new RegExp(String.raw`^!\[([^\]]*)\]` + PERCORSO + "$");
 
 function leggiJson(dir, nome) {
   const file = join(dir, nome);
   if (!existsSync(file)) throw new ErroreContenuti([`${nome}: file mancante`]);
+  const testoFile = readFileSync(file, "utf8").replace(/^\uFEFF/, "");
   try {
-    return JSON.parse(readFileSync(file, "utf8"));
+    return JSON.parse(testoFile);
   } catch (e) {
-    throw new ErroreContenuti([`${nome}: JSON non valido (${e.message})`]);
+    const posizione = e.message.match(/position (\d+)/);
+    const riga = posizione ? ` alla riga ${testoFile.slice(0, Number(posizione[1])).split("\n").length}` : "";
+    throw new ErroreContenuti([
+      `${nome}: JSON non valido${riga}. Controlla virgole e virgolette (una virgola in più prima di } o ], oppure una virgoletta mancante).`,
+    ]);
   }
 }
 
@@ -55,7 +62,7 @@ export function proteggiDuePunti(testoFile) {
 // Legge un file .md con intestazione; un errore di formato diventa un messaggio italiano.
 function leggiMd(file, etichetta) {
   try {
-    const { data, content } = matter(proteggiDuePunti(readFileSync(file, "utf8").replace(/\r\n/g, "\n")));
+    const { data, content } = matter(proteggiDuePunti(readFileSync(file, "utf8").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n")));
     return { dati: data, corpo: content };
   } catch (e) {
     const riga = e.mark ? ` (riga ${e.mark.line + 2})` : "";
@@ -63,6 +70,24 @@ function leggiMd(file, etichetta) {
       errore: `${etichetta}: errore di formato nell'intestazione${riga}. Controlla virgolette e due punti.`,
     };
   }
+}
+
+// Controlla i nomi dei file rispettando maiuscole e minuscole (come fa GitHub),
+// e suggerisce il nome giusto quando cambia solo una lettera maiuscola.
+function controlloFile(cartella) {
+  const elenchi = new Map();
+  const elenco = (d) => {
+    if (!elenchi.has(d)) elenchi.set(d, existsSync(d) ? readdirSync(d) : []);
+    return elenchi.get(d);
+  };
+  const dentro = (f) => dirname(join(cartella, f));
+  return {
+    esiste: (f) => elenco(dentro(f)).includes(basename(f)),
+    suggerisci: (f) => {
+      const trovato = elenco(dentro(f)).find((x) => x.toLowerCase() === basename(f).toLowerCase());
+      return trovato ? join(dirname(f), trovato).replace(/\\/g, "/") : null;
+    },
+  };
 }
 
 const lista = (v) =>
@@ -135,7 +160,7 @@ export async function caricaProgetti(dir, opzioni) {
     const separato = separaIntro(corpo, testo(dati.intro));
     const esito = validaProgetto({
       dati, cartella, categorie,
-      esiste: (f) => existsSync(join(percorso, f)),
+      ...controlloFile(percorso),
       immaginiCorpo: immaginiNelCorpo(separato.corpo),
       intro: separato.intro,
     });
@@ -184,8 +209,10 @@ export async function caricaAbout(dir, opzioni) {
   if (letto.errore) throw new ErroreContenuti([letto.errore]);
   const { dati, corpo } = letto;
   const nomeFoto = testo(dati.foto);
-  if (nomeFoto && !existsSync(join(dir, nomeFoto))) {
-    throw new ErroreContenuti([`about.md: immagine "${nomeFoto}" non trovata`]);
+  const fotoOk = controlloFile(dir);
+  if (nomeFoto && !fotoOk.esiste(nomeFoto)) {
+    const simile = fotoOk.suggerisci(nomeFoto);
+    throw new ErroreContenuti([`about.md: immagine "${nomeFoto}" non trovata${simile ? `: forse intendevi "${simile}"?` : ""}`]);
   }
   const foto = nomeFoto
     ? (await preparaImmagine(join(dir, nomeFoto), { alt: sito.nome, misure: MISURE.foto, ...opzioni })).html

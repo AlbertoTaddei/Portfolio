@@ -8,7 +8,7 @@
   <meta name="description" content="{{ descrizione or sito.descrizioneSito }}">
   <meta property="og:title" content="{{ titoloPagina or sito.nome }}">
   <meta property="og:description" content="{{ descrizione or sito.descrizioneSito }}">
-  {% if immagineOg %}<meta property="og:image" content="{{ immagineOg }}">{% endif %}
+  {% if immagineOg %}<meta property="og:image" content="{{ immagineOg | assoluto }}">{% endif %}
   <link rel="stylesheet" href="{{ '/stile/stile.css' | url }}">
 </head>
 <body>

@@ -72,3 +72,24 @@ test("contenuti reali con sottopercorso (GitHub Pages)", async () => {
   assert.match(home, /src="\/portfolio\/img\//);
   assert.doesNotMatch(home, /(href|src)="\/(?!portfolio\/)/);
 });
+
+test("Final #1: titoli con apostrofo e & escapati una volta sola", async () => {
+  const dir = await copiaEsempio();
+  await writeFile(join(dir, "progetti/alfa/progetto.md"), "---\ntitolo: L'altro & co\ncategoria: Film Making\nanno: 2024\ncopertina: copertina.jpg\nintro: È \"bello\" & strano\n---\nx\n");
+  const out = await costruisci({ contenuti: dir });
+  const html = leggi(out, "progetti/alfa/index.html");
+  assert.doesNotMatch(html, /&amp;#|&amp;amp;|&amp;quot;/);
+  assert.match(html, /<title>L(&#39;|')altro &amp; co — Nome Cognome<\/title>/);
+});
+
+test("Final #4: og:image assoluta quando SITO_URL è noto", async () => {
+  const out = await costruisci({ contenuti: "test/esempio", prefisso: "/Portfolio/", sitoUrl: "https://alberto.github.io/Portfolio" });
+  assert.match(leggi(out, "progetti/alfa/index.html"), /property="og:image" content="https:\/\/alberto\.github\.io\/Portfolio\/img\//);
+});
+
+test("Final #3: il workflow usa il percorso calcolato da GitHub Pages", () => {
+  const wf = readFileSync(".github/workflows/pubblica.yml", "utf8");
+  assert.match(wf, /steps\.pages\.outputs\.base_path/);
+  assert.match(wf, /steps\.pages\.outputs\.base_url/);
+  assert.ok(wf.indexOf("configure-pages") < wf.indexOf("npm run build"));
+});

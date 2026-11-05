@@ -149,6 +149,7 @@ Il sito vive su **GitHub Pages**: ogni volta che carichi le modifiche sul ramo `
 **La prima volta:**
 1. Crea un repository su GitHub e caricaci la cartella `Portfolio` (con [GitHub Desktop](https://desktop.github.com/): *File → Add local repository*, poi *Publish repository*).
 2. Su github.com, nel repository: **Settings → Pages → Source: GitHub Actions**.
+   Il primo tentativo di pubblicazione, partito prima di questa impostazione, fallisce: vai in **Actions**, apri il tentativo e premi **Re-run all jobs**.
 3. Indirizzo del sito: `https://<tuo-utente>.github.io/<nome-repository>/`. Se chiami il repository `<tuo-utente>.github.io`, l'indirizzo è direttamente `https://<tuo-utente>.github.io/`.
 
 **Ogni volta (con GitHub Desktop):**
@@ -156,7 +157,7 @@ Il sito vive su **GitHub Pages**: ogni volta che carichi le modifiche sul ramo `
 2. **Push origin**.
 3. Su github.com, scheda **Actions**: dopo un paio di minuti compare una spunta verde ✓. Il sito è aggiornato.
 
-**Dominio personalizzato** (es. `albertonome.it`): compralo da un registrar, poi su GitHub **Settings → Pages → Custom domain** e segui le istruzioni per i record DNS. GitHub crea da solo il file `CNAME`.
+**Dominio personalizzato** (es. `albertonome.it`): compralo da un registrar, poi su GitHub **Settings → Pages → Custom domain** e segui le istruzioni per i record DNS. Non serve nessun file `CNAME`: il dominio si imposta solo lì. Dopo averlo impostato, ripubblica (Actions → Re-run all jobs): il sito si adatta da solo al nuovo indirizzo.
 
 ---
 

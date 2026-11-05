@@ -14,6 +14,8 @@ export class ErroreContenuti extends Error {
     super(messaggi.join("\n"));
     this.name = "ErroreContenuti";
     this.messaggi = messaggi;
+    // Niente righe di codice nel messaggio: solo gli errori da correggere.
+    this.stack = `Errori nei contenuti:\n${messaggi.join("\n")}`;
   }
 }
 
@@ -34,7 +36,7 @@ export function validaImpostazioni(imp) {
   return errori;
 }
 
-export function validaProgetto({ dati, cartella, categorie, esiste, immaginiCorpo = [], intro = "" }) {
+export function validaProgetto({ dati, cartella, categorie, esiste, suggerisci = () => null, immaginiCorpo = [], intro = "" }) {
   const p = `progetti/${cartella}/progetto.md: `;
   const errori = [];
   const avvisi = [];
@@ -58,7 +60,9 @@ export function validaProgetto({ dati, cartella, categorie, esiste, immaginiCorp
   }
   const immagini = [...(vuoto(dati.copertina) ? [] : [String(dati.copertina)]), ...immaginiCorpo];
   for (const file of new Set(immagini)) {
-    if (!esiste(file)) errori.push(`${p}immagine "${file}" non trovata`);
+    if (esiste(file)) continue;
+    const simile = suggerisci(file);
+    errori.push(`${p}immagine "${file}" non trovata${simile ? `: forse intendevi "${simile}"?` : ""}`);
   }
 
   for (const campo of Object.keys(dati)) {

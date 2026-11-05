@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, cp, writeFile, rm, mkdir } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { caricaProgetti, caricaAbout, leggiDati } from "../strumenti/contenuti.js";
@@ -105,4 +106,34 @@ test("il modello copiato così com'è funziona (commenti con due punti)", async 
   assert.equal(p.intro, "Una o due righe sul progetto.");
   assert.equal(p.evidenza, false);
   assert.equal(p.ordine, undefined);
+});
+
+test("Final #5: nomi di file con parentesi", async () => {
+  const dir = await copiaEsempio();
+  await cp("test/esempio/progetti/alfa/copertina.jpg", join(dir, "progetti/alfa/foto (1).jpg"));
+  await writeFile(join(dir, "progetti/alfa/progetto.md"), "---\ntitolo: A\ncategoria: Film Making\nanno: 2024\ncopertina: copertina.jpg\n---\n![Copia](foto (1).jpg)\n");
+  const a = (await caricaProgetti(dir, await opz())).find((x) => x.cartella === "alfa");
+  assert.match(a.corpoHtml, /<figcaption>Copia<\/figcaption>/);
+});
+
+test("Final #6: maiuscole diverse dal file reale → errore con suggerimento", async () => {
+  const dir = await copiaEsempio();
+  await writeFile(join(dir, "progetti/alfa/progetto.md"), "---\ntitolo: A\ncategoria: Film Making\nanno: 2024\ncopertina: Copertina.JPG\n---\nx\n");
+  await assert.rejects(caricaProgetti(dir, await opz()), /forse intendevi "copertina\.jpg"/);
+});
+
+test("Final #7: JSON con BOM accettato; errore JSON in italiano con riga", async () => {
+  const dir = await copiaEsempio();
+  const testi = readFileSync(join(dir, "testi.json"), "utf8");
+  await writeFile(join(dir, "testi.json"), "﻿" + testi);
+  assert.equal(leggiDati(dir).testi.filtroTutti, "Tutti");
+  await writeFile(join(dir, "testi.json"), '{\n  "a": "b",\n}\n');
+  assert.throws(() => leggiDati(dir), (e) => /testi\.json: JSON non valido/.test(e.message) && /riga 3/.test(e.message) && /virgol/.test(e.message) && !/Unexpected/.test(e.message));
+});
+
+test("Final #8: progetto.md con BOM e due punti", async () => {
+  const dir = await copiaEsempio();
+  await writeFile(join(dir, "progetti/alfa/progetto.md"), "﻿---\ntitolo: Parte: due\ncategoria: Film Making\nanno: 2024\ncopertina: copertina.jpg\n---\nx\n");
+  const a = (await caricaProgetti(dir, await opz())).find((x) => x.cartella === "alfa");
+  assert.equal(a.titolo, "Parte: due");
 });

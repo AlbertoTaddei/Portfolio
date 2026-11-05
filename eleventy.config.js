@@ -7,6 +7,8 @@ import { slugCategoria } from "./strumenti/testo.js";
 // Cartella dei contenuti (i test ne usano una diversa).
 const CONTENUTI = process.env.CONTENUTI || "contenuti";
 const PREFISSO = process.env.PATH_PREFIX || "/";
+// Indirizzo pubblico del sito (lo imposta GitHub): serve per le anteprime social.
+const SITO_URL = process.env.SITO_URL || "";
 
 // Font copiati da node_modules nel sito (niente Google Fonts esterni).
 const FONT = {
@@ -16,6 +18,11 @@ const FONT = {
 
 export default function (eleventyConfig) {
   eleventyConfig.setNunjucksEnvironmentOptions({ autoescape: true });
+
+  // Rende assoluto un indirizzo (es. l'immagine di anteprima per LinkedIn).
+  eleventyConfig.addFilter("assoluto", (indirizzo) =>
+    SITO_URL && indirizzo ? new URL(indirizzo, SITO_URL.endsWith("/") ? SITO_URL : `${SITO_URL}/`).href : indirizzo
+  );
 
   eleventyConfig.addPassthroughCopy({ stile: "stile" });
   eleventyConfig.addPassthroughCopy({ script: "script" });
