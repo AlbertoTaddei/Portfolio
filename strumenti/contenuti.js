@@ -33,15 +33,33 @@ export function leggiDati(dir) {
   return { sito, testi };
 }
 
+// Nell'intestazione un valore come "Progetto: parte 2" romperebbe il formato YAML.
+// Qui i valori semplici che contengono ": " vengono messi tra virgolette da soli.
+export function proteggiDuePunti(testoFile) {
+  const parti = testoFile.match(/^(---\n)([\s\S]*?)(\n---(?:\n|$)[\s\S]*)$/);
+  if (!parti) return testoFile;
+  const intestazione = parti[2]
+    .split("\n")
+    .map((riga) => {
+      const m = riga.match(/^([A-Za-zÀ-ÿ_][\wÀ-ÿ-]*):[ \t]+(.+)$/);
+      if (!m) return riga;
+      const valore = m[2].trim();
+      if (/^["'\[{|>&*!]/.test(valore) || !/: /.test(valore)) return riga;
+      return `${m[1]}: "${valore.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+    })
+    .join("\n");
+  return parti[1] + intestazione + parti[3];
+}
+
 // Legge un file .md con intestazione; un errore di formato diventa un messaggio italiano.
 function leggiMd(file, etichetta) {
   try {
-    const { data, content } = matter(readFileSync(file, "utf8").replace(/\r\n/g, "\n"));
+    const { data, content } = matter(proteggiDuePunti(readFileSync(file, "utf8").replace(/\r\n/g, "\n")));
     return { dati: data, corpo: content };
   } catch (e) {
     const riga = e.mark ? ` (riga ${e.mark.line + 2})` : "";
     return {
-      errore: `${etichetta}: errore di formato nell'intestazione${riga}. Se un valore contiene ":" mettilo tra virgolette.`,
+      errore: `${etichetta}: errore di formato nell'intestazione${riga}. Controlla virgolette e due punti.`,
     };
   }
 }

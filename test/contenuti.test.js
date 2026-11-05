@@ -47,9 +47,18 @@ test("intro ricavata e tolta dal corpo (file con CRLF)", async () => {
   assert.match(beta.corpoHtml, /Secondo paragrafo di beta/);
 });
 
+test("due punti nel valore: accettati senza virgolette", async () => {
+  const dir = await copiaEsempio();
+  await writeFile(join(dir, "progetti/alfa/progetto.md"), "---\ntitolo: Progetto: parte 2\ncategoria: Film Making\nanno: 2024\ncopertina: copertina.jpg\n---\nx\n");
+  const lista = await caricaProgetti(dir, await opz());
+  assert.ok(lista.some((p) => p.titolo === "Progetto: parte 2"));
+  await writeFile(join(dir, "about.md"), "---\nfrase: Risolvo problemi: è quello che mi piace fare.\n---\nx\n");
+  assert.equal((await caricaAbout(dir, await opz())).frase, "Risolvo problemi: è quello che mi piace fare.");
+});
+
 test("errore YAML: messaggio in italiano con il file", async () => {
   const dir = await copiaEsempio();
-  await writeFile(join(dir, "progetti/alfa/progetto.md"), "---\ntitolo: Progetto: parte 2\n---\nx\n");
+  await writeFile(join(dir, "progetti/alfa/progetto.md"), "---\ntitolo: \"aperta\n---\nx\n");
   await assert.rejects(caricaProgetti(dir, await opz()), (e) => e.message.includes("progetti/alfa/progetto.md") && e.message.includes("virgolette"));
 });
 
