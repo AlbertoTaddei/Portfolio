@@ -63,3 +63,12 @@ test("la costruzione fallisce con un messaggio chiaro", async () => {
   await writeFile(join(dir, "progetti/alfa/progetto.md"), "---\ntitolo: A\ncategoria: Boh\nanno: 2024\ncopertina: copertina.jpg\n---\nx\n");
   await assert.rejects(costruisci({ contenuti: dir }), /non esiste\. Valori possibili/);
 });
+
+test("contenuti reali con sottopercorso (GitHub Pages)", async () => {
+  const out = await costruisci({ contenuti: "contenuti", prefisso: "/portfolio/" });
+  const home = leggi(out, "index.html");
+  assert.match(home, /href="\/portfolio\/stile\/stile\.css"/);
+  assert.match(home, /href="\/portfolio\/progetti\//);
+  assert.match(home, /src="\/portfolio\/img\//);
+  assert.doesNotMatch(home, /(href|src)="\/(?!portfolio\/)/);
+});

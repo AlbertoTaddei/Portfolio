@@ -94,3 +94,15 @@ test("about", async () => {
   await writeFile(join(dir, "about.md"), "---\nfoto: manca.jpg\n---\nx\n");
   await assert.rejects(caricaAbout(dir, await opz()), /about\.md: immagine "manca\.jpg" non trovata/);
 });
+
+test("il modello copiato così com'è funziona (commenti con due punti)", async () => {
+  const dir = await copiaEsempio();
+  await cp("contenuti/progetti/_modello", join(dir, "progetti/da-modello"), { recursive: true });
+  await cp("test/esempio/progetti/alfa/copertina.jpg", join(dir, "progetti/da-modello/copertina.jpg"));
+  await cp("test/esempio/progetti/alfa/copertina.jpg", join(dir, "progetti/da-modello/01.jpg"));
+  const p = (await caricaProgetti(dir, await opz())).find((x) => x.cartella === "da-modello");
+  assert.equal(p.titolo, "Titolo del progetto");
+  assert.equal(p.intro, "Una o due righe sul progetto.");
+  assert.equal(p.evidenza, false);
+  assert.equal(p.ordine, undefined);
+});

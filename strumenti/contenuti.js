@@ -43,9 +43,10 @@ export function proteggiDuePunti(testoFile) {
     .map((riga) => {
       const m = riga.match(/^([A-Za-zÀ-ÿ_][\wÀ-ÿ-]*):[ \t]+(.+)$/);
       if (!m) return riga;
-      const valore = m[2].trim();
-      if (/^["'\[{|>&*!]/.test(valore) || !/: /.test(valore)) return riga;
-      return `${m[1]}: "${valore.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+      // Un commento finale (" # nota") resta fuori dalle virgolette.
+      const [, valore, commento = ""] = m[2].match(/^(.*?)(\s+#.*)?$/);
+      if (/^["'\[{|>&*!#]/.test(valore) || !/: /.test(valore)) return riga;
+      return `${m[1]}: "${valore.trim().replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"${commento}`;
     })
     .join("\n");
   return parti[1] + intestazione + parti[3];
