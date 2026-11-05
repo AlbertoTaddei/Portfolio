@@ -1,0 +1,45 @@
+---
+layout: base.njk
+sezione: progetti
+pagination:
+  data: progetti
+  size: 1
+  alias: p
+permalink: "progetti/{{ p.cartella }}/"
+eleventyComputed:
+  titoloPagina: "{{ p.titolo }}"
+  descrizione: "{{ p.intro }}"
+  immagineOg: "{{ p.copertina.jpeg }}"
+---
+{#- Pagina di un progetto: intestazione, corpo (da progetto.md), vicini. -#}
+<a class="torna" href="{{ '/' | url }}">{{ testi.tornaAiProgetti }}</a>
+
+<article class="progetto" style="--colore-categoria: {{ p.colore }}">
+  <header class="intestazione">
+    <p class="meta-categoria"><span class="pallino" aria-hidden="true"></span>{{ p.categoria }} · {{ p.anno }}</p>
+    <h1>{{ p.titolo }}</h1>
+    {%- if p.software.length or p.crediti or p.contesto %}
+    <dl class="fascia">
+      {%- if p.software.length %}<div><dt>{{ testi.software }}</dt><dd>{{ p.software | join(", ") }}</dd></div>{% endif %}
+      {%- if p.crediti %}<div><dt>{{ testi.crediti }}</dt><dd>{{ p.crediti }}</dd></div>{% endif %}
+      {%- if p.contesto %}<div><dt>{{ testi.contesto }}</dt><dd>{{ p.contesto }}</dd></div>{% endif %}
+    </dl>
+    {%- endif %}
+    {%- if p.intro %}
+    <p class="intro">{{ p.intro }}</p>
+    {%- endif %}
+  </header>
+  <div class="corpo">
+    {{ p.corpoHtml | safe }}
+  </div>
+</article>
+
+<nav class="vicini">
+  {%- if p.precedente %}
+  <a class="vicini-precedente" href="{{ p.precedente.url | url }}"><span class="vicini-etichetta">{{ testi.precedente }}</span>{{ p.precedente.titolo }}</a>
+  {%- else %}<span></span>{% endif %}
+  <a class="vicini-tutti" href="{{ '/' | url }}">{{ testi.tuttiIProgetti }}</a>
+  {%- if p.successivo %}
+  <a class="vicini-successivo" href="{{ p.successivo.url | url }}"><span class="vicini-etichetta">{{ testi.successivo }}</span>{{ p.successivo.titolo }}</a>
+  {%- else %}<span></span>{% endif %}
+</nav>

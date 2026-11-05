@@ -1,0 +1,11 @@
+---
+layout: base.njk
+permalink: 404.html
+eleventyComputed:
+  titoloPagina: "{{ testi.erroreTitolo }}"
+---
+{#- Pagina mostrata per gli indirizzi che non esistono. -#}
+<div class="errore">
+  <h1>{{ testi.erroreTitolo }}</h1>
+  <a class="torna" href="{{ '/' | url }}">{{ testi.erroreLink }}</a>
+</div>

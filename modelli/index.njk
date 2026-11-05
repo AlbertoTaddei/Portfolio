@@ -1,1 +1,39 @@
-<h1>ok</h1>
+---
+layout: base.njk
+sezione: progetti
+permalink: /
+---
+{#- Home: filtro per categoria + griglia bento dei progetti. -#}
+<div class="filtro" hidden>
+  <button class="filtro-bottone" type="button" data-categoria="tutti" aria-pressed="true">{{ testi.filtroTutti }}</button>
+  {%- for c in categorieUsate %}
+  <button class="filtro-bottone" type="button" data-categoria="{{ c.slug }}" aria-pressed="false" style="--colore-categoria: {{ c.colore }}"><span class="pallino" aria-hidden="true"></span>{{ c.nome }}</button>
+  {%- endfor %}
+</div>
+
+<div class="griglia">
+  {%- for p in progetti %}
+  <a class="casella{% if p.evidenza %} casella--evidenza{% endif %}" href="{{ p.url | url }}" data-categoria="{{ p.slug }}" style="--colore-categoria: {{ p.colore }}">
+    <span class="casella-immagine">
+      {%- if p.evidenza -%}
+        {{ (p.copertina.eagerEvidenza if loop.first else p.copertina.evidenza) | safe }}
+      {%- else -%}
+        {{ (p.copertina.eagerCasella if loop.first else p.copertina.casella) | safe }}
+      {%- endif -%}
+    </span>
+    <span class="casella-titolo">{{ p.titolo }}</span>
+    <span class="casella-meta"><span class="pallino" aria-hidden="true"></span>{{ p.categoria }} · {{ p.anno }}</span>
+    {%- if p.evidenza and p.intro %}
+    <span class="casella-intro">{{ p.intro }}</span>
+    {%- endif %}
+  </a>
+  {%- endfor %}
+</div>
+
+<footer class="piede">
+  <span class="piede-contatti">
+    <a href="mailto:{{ sito.email }}">{{ sito.email }}</a>
+    {%- if sito.linkedin %} · <a href="{{ sito.linkedin }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+  </span>
+  <a href="{{ '/about/' | url }}">{{ testi.aboutLink }}</a>
+</footer>

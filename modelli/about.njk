@@ -1,0 +1,29 @@
+---
+layout: base.njk
+sezione: about
+permalink: about/
+eleventyComputed:
+  titoloPagina: "{{ testi.menuAbout }}"
+---
+{#- Pagina About: foto (facoltativa), presentazione, software, contatti. -#}
+<div class="about{% if not about.foto %} about--senza-foto{% endif %}">
+  {%- if about.foto %}
+  <div class="about-foto">{{ about.foto | safe }}</div>
+  {%- endif %}
+  <div class="about-testo">
+    <h1>{{ sito.nome }}</h1>
+    {%- if about.sottotitolo %}<p class="sottotitolo">{{ about.sottotitolo }}</p>{% endif %}
+    <div class="about-corpo">{{ about.corpoHtml | safe }}</div>
+    {%- if about.frase %}<p class="frase">{{ about.frase }}</p>{% endif %}
+    {%- if about.software.length %}
+    <dl class="fascia"><div><dt>{{ testi.software }}</dt><dd>{{ about.software | join(", ") }}</dd></div></dl>
+    {%- endif %}
+    <div class="contatti">
+      <h2 class="contatti-titolo">{{ testi.contatti }}</h2>
+      <a href="mailto:{{ sito.email }}">{{ sito.email }}</a>
+      {%- if sito.linkedin %}<a href="{{ sito.linkedin }}" target="_blank" rel="noopener">LinkedIn</a>{% endif %}
+      {%- if sito.curriculum %}<a href="{{ sito.curriculum }}" target="_blank" rel="noopener">{{ testi.curriculum }}</a>{% endif %}
+    </div>
+  </div>
+</div>
+<a class="torna torna--fondo" href="{{ '/' | url }}">{{ testi.guardaIProgetti }}</a>

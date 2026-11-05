@@ -1,0 +1,26 @@
+{#- Scheletro comune a tutte le pagine: testa, barra in alto, contenuto. -#}
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if titoloPagina %}{{ titoloPagina }} — {% endif %}{{ sito.nome }}</title>
+  <meta name="description" content="{{ descrizione or sito.descrizioneSito }}">
+  <meta property="og:title" content="{{ titoloPagina or sito.nome }}">
+  <meta property="og:description" content="{{ descrizione or sito.descrizioneSito }}">
+  {% if immagineOg %}<meta property="og:image" content="{{ immagineOg }}">{% endif %}
+  <link rel="stylesheet" href="{{ '/stile/stile.css' | url }}">
+</head>
+<body>
+  <header class="barra contenitore">
+    <a class="barra-nome" href="{{ '/' | url }}">{{ sito.nome }}</a>
+    <nav class="barra-menu">
+      <a href="{{ '/' | url }}"{% if sezione == "progetti" %} aria-current="page"{% endif %}>{{ testi.menuProgetti }}</a>
+      <a href="{{ '/about/' | url }}"{% if sezione == "about" %} aria-current="page"{% endif %}>{{ testi.menuAbout }}</a>
+    </nav>
+  </header>
+  <main class="contenitore">
+    {{ content | safe }}
+  </main>
+</body>
+</html>
